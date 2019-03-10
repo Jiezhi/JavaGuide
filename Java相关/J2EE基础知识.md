@@ -34,7 +34,7 @@
 
 1，需要为每个请求启动一个操作CGI程序的系统进程。如果请求频繁，这将会带来很大的开销。
 
-2，需要为每个请求加载和运行一个CGI程序，这将带来很大的开销 
+2，需要为每个请求加载和运行一个CGI程序，这将带来很大的开销
 
 3，需要重复编写处理网络协议的代码以及编码，这些工作都是非常耗时的。
 
@@ -95,9 +95,11 @@ Form标签里的method的属性为get时调用doGet()，为post时调用doPost()
 
 **转发（Forword）**
 通过RequestDispatcher对象的forward（HttpServletRequest request,HttpServletResponse response）方法实现的。RequestDispatcher可以通过HttpServletRequest 的getRequestDispatcher()方法获得。例如下面的代码就是跳转到login_success.jsp页面。
+
 ```java
      request.getRequestDispatcher("login_success.jsp").forward(request, response);
 ```
+
 **重定向（Redirect）**  是利用服务器返回的状态码来实现的。客户端浏览器请求服务器的时候，服务器会返回一个状态码。服务器通过 `HttpServletResponse` 的 `setStatus(int status)` 方法设置状态码。如果服务器返回301或者302，则浏览器会到新的网址重新请求该资源。
 
 1. **从地址栏显示来说**
@@ -105,12 +107,12 @@ Form标签里的method的属性为get时调用doGet()，为post时调用doPost()
 forward是服务器请求资源,服务器直接访问目标地址的URL,把那个URL的响应内容读取过来,然后把这些内容再发给浏览器.浏览器根本不知道服务器发送的内容从哪里来的,所以它的地址栏还是原来的地址.
 redirect是服务端根据逻辑,发送一个状态码,告诉浏览器重新去请求那个地址.所以地址栏显示的是新的URL.
 
-2. **从数据共享来说**
+1. **从数据共享来说**
 
 forward:转发页面和转发到的页面可以共享request里面的数据.
 redirect:不能共享数据.
 
-3. **从运用地方来说**
+1. **从运用地方来说**
 
 forward:一般用于用户登陆的时候,根据角色转发到相应的模块.
 redirect:一般用于用户注销登陆时返回主页面和跳转到其它的网站等
