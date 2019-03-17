@@ -1,44 +1,41 @@
-
+# 可能是把Java内存区域讲的最清楚的一篇文章
 
 ## 写在前面（常见面试题）
 
-### 基本问题：
+### 基本问题
 
 - **介绍下 Java 内存区域（运行时数据区）**
 - **Java 对象的创建过程（五步，建议能默写出来并且要知道每一步虚拟机做了什么）**
 - **对象的访问定位的两种方式（句柄和直接指针两种方式）**
 
-### 拓展问题:
+### 拓展问题
 
 - **String类和常量池**
 - **8种基本类型的包装类和常量池**
 
-
-## 1   概述
+## 1 概述
 
 对于 Java 程序员来说，在虚拟机自动内存管理机制下，不再需要像C/C++程序开发程序员这样为内一个 new 操作去写对应的 delete/free 操作，不容易出现内存泄漏和内存溢出问题。正是因为 Java 程序员把内存控制权利交给 Java 虚拟机，一旦出现内存泄漏和溢出方面的问题，如果不了解虚拟机是怎样使用内存的，那么排查错误将会是一个非常艰巨的任务。
 
-
 ## 2 运行时数据区域
+
 Java 虚拟机在执行 Java 程序的过程中会把它管理的内存划分成若干个不同的数据区域。
-![](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-3/JVM运行时数据区域.png)
+![JVM运行时数据区域](https://my-blog-to-use.oss-cn-beijing.aliyuncs.com/2019-3/JVM运行时数据区域.png)
 
 这些组成部分一些是线程私有的，其他的则是线程共享的。
 
-**线程私有的：**
+- 线程私有的
+  - 程序计数器
+  - 虚拟机栈
+  - 本地方法栈
 
-- 程序计数器
-- 虚拟机栈
-- 本地方法栈
-
-**线程共享的：**
-
-- 堆
-- 方法区
-- 直接内存
-
+- 线程共享的
+  - 堆
+  - 方法区
+  - 直接内存
 
 ### 2.1 程序计数器
+
 程序计数器是一块较小的内存空间，可以看作是当前线程所执行的字节码的行号指示器。**字节码解释器工作时通过改变这个计数器的值来选取下一条需要执行的字节码指令，分支、循环、跳转、异常处理、线程恢复等功能都需要依赖这个计数器来完。**
 
 另外，**为了线程切换后能恢复到正确的执行位置，每条线程都需要有一个独立的程序计数器，各线程之间计数器互不影响，独立存储，我们称这类内存区域为“线程私有”的内存。**
@@ -74,6 +71,7 @@ Java 虚拟机栈也是线程私有的，每个线程都有各自的Java虚拟�
 方法执行完毕后相应的栈帧也会出栈并释放内存空间，也会出现 StackOverFlowError 和 OutOfMemoryError 两种异常。
 
 ### 2.4 堆
+
 Java 虚拟机所管理的内存中最大的一块，Java 堆是所有线程共享的一块内存区域，在虚拟机启动时创建。**此内存区域的唯一目的就是存放对象实例，几乎所有的对象实例以及数组都在这里分配内存。**
 
 Java 堆是垃圾收集器管理的主要区域，因此也被称作**GC堆（Garbage Collected Heap）**.从垃圾回收的角度，由于现在收集器基本都采用分代垃圾收集算法，所以Java堆还可以细分为：新生代和老年代：再细致一点有：Eden空间、From Survivor、To Survivor空间等。**进一步划分的目的是更好地回收内存，或者更快地分配内存。**
@@ -84,15 +82,13 @@ Java 堆是垃圾收集器管理的主要区域，因此也被称作**GC堆（Ga
 
 推荐阅读：
 
-- 《Java8内存模型—永久代(PermGen)和元空间(Metaspace)》：[http://www.cnblogs.com/paddix/p/5309550.html](http://www.cnblogs.com/paddix/p/5309550.html)
+- [《Java8内存模型—永久代(PermGen)和元空间(Metaspace)》](http://www.cnblogs.com/paddix/p/5309550.html)
 
 ### 2.5 方法区
 
 **方法区与 Java 堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。虽然Java虚拟机规范把方法区描述为堆的一个逻辑部分，但是它却有一个别名叫做 Non-Heap（非堆），目的应该是与 Java 堆区分开来。**
 
 HotSpot 虚拟机中方法区也常被称为 **“永久代”**，本质上两者并不等价。仅仅是因为 HotSpot 虚拟机设计团队用永久代来实现方法区而已，这样 HotSpot 虚拟机的垃圾收集器就可以像管理 Java 堆一样管理这部分内存了。但是这并不是一个好主意，因为这样更容易遇到内存溢出问题。
-
-
 
 **相对而言，垃圾收集行为在这个区域是比较少出现的，但并非数据进入方法区后就“永久存在”了。**
 
@@ -104,15 +100,12 @@ HotSpot 虚拟机中方法区也常被称为 **“永久代”**，本质上两�
 
 **JDK1.7及之后版本的 JVM 已经将运行时常量池从方法区中移了出来，在 Java 堆（Heap）中开辟了一块区域存放运行时常量池。** 
 
-![](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-9-14/26038433.jpg)
-——图片来源：https://blog.csdn.net/wangbiao007/article/details/78545189
-
-
+![常亮池](http://my-blog-to-use.oss-cn-beijing.aliyuncs.com/18-9-14/26038433.jpg)
+*[图片来源](https://blog.csdn.net/wangbiao007/article/details/78545189)*
 
 推荐阅读：
 
-- 《Java 中几种常量池的区分》： [https://blog.csdn.net/qq_26222859/article/details/73135660](https://blog.csdn.net/qq_26222859/article/details/73135660)
-
+- [《Java 中几种常量池的区分》](https://blog.csdn.net/qq_26222859/article/details/73135660)
 
 ### 2.7 直接内存
 
@@ -122,18 +115,18 @@ JDK1.4中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**通
 
 本机直接内存的分配不会收到 Java 堆的限制，但是，既然是内存就会受到本机总内存大小以及处理器寻址空间的限制。
 
-
 ## 3 HotSpot 虚拟机对象探秘
+
 通过上面的介绍我们大概知道了虚拟机的内存情况，下面我们来详细的了解一下 HotSpot 虚拟机在 Java 堆中对象分配、布局和访问的全过程。
 
 ### 3.1 对象的创建
+
 下图便是 Java 对象的创建过程，我建议最好是能默写出来，并且要掌握每一步在做什么。
 ![Java对象的创建过程](https://user-gold-cdn.xitu.io/2018/8/22/16561e59a4135869?w=950&h=279&f=png&s=28529)
 
 **①类加载检查：** 虚拟机遇到一条 new 指令时，首先将去检查这个指令的参数是否能在常量池中定位到这个类的符号引用，并且检查这个符号引用代表的类是否已被加载过、解析和初始化过。如果没有，那必须先执行相应的类加载过程。
 
 **②分配内存：** 在**类加载检查**通过后，接下来虚拟机将为新生对象**分配内存**。对象所需的内存大小在类加载完成后便可确定，为对象分配空间的任务等同于把一块确定大小的内存从 Java 堆中划分出来。**分配方式**有 **“指针碰撞”** 和 **“空闲列表”** 两种，**选择那种分配方式由 Java 堆是否规整决定，而Java堆是否规整又由所采用的垃圾收集器是否带有压缩整理功能决定**。
-
 
 **内存分配的两种方式：（补充内容，需要掌握）**
 
@@ -148,15 +141,11 @@ JDK1.4中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**通
 - **CAS+失败重试：** CAS 是乐观锁的一种实现方式。所谓乐观锁就是，每次不加锁而是假设没有冲突而去完成某项操作，如果因为冲突失败就重试，直到成功为止。**虚拟机采用 CAS 配上失败重试的方式保证更新操作的原子性。**
 - **TLAB：** 为每一个线程预先在Eden区分配一块儿内存，JVM在给线程中的对象分配内存时，首先在TLAB分配，当对象大于TLAB中的剩余内存或TLAB的内存已用尽时，再采用上述的CAS进行内存分配
 
-
-
 **③初始化零值：** 内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头），这一步操作保证了对象的实例字段在 Java 代码中可以不赋初始值就直接使用，程序能访问到这些字段的数据类型所对应的零值。
 
 **④设置对象头：** 初始化零值完成之后，**虚拟机要对对象进行必要的设置**，例如这个对象是那个类的实例、如何才能找到类的元数据信息、对象的哈希吗、对象的 GC 分代年龄等信息。 **这些信息存放在对象头中。** 另外，根据虚拟机当前运行状态的不同，如是否启用偏向锁等，对象头会有不同的设置方式。
 
-
 **⑤执行 init 方法：** 在上面工作都完成之后，从虚拟机的视角来看，一个新的对象已经产生了，但从 Java 程序的视角来看，对象创建才刚开始，`<init>` 方法还没有执行，所有的字段都还为零。所以一般来说，执行 new 指令之后会接着执行 `<init>` 方法，把对象按照程序员的意愿进行初始化，这样一个真正可用的对象才算完全产生出来。
-
 
 ### 3.2 对象的内存布局
 
@@ -169,6 +158,7 @@ JDK1.4中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**通
 **对齐填充部分不是必然存在的，也没有什么特别的含义，仅仅起占位作用。** 因为Hotspot虚拟机的自动内存管理系统要求对象起始地址必须是8字节的整数倍，换句话说就是对象的大小必须是8字节的整数倍。而对象头部分正好是8字节的倍数（1倍或2倍），因此，当对象实例数据部分没有对齐时，就需要通过对齐填充来补全。
 
 ### 3.3 对象的访问定位
+
 建立对象就是为了使用对象，我们的Java程序通过栈上的 reference 数据来操作堆上的具体对象。对象的访问方式有虚拟机实现而定，目前主流的访问方式有**①使用句柄**和**②直接指针**两种：
 
 1. **句柄：** 如果使用句柄的话，那么Java堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自的具体地址信息；
@@ -180,52 +170,50 @@ JDK1.4中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**通
 
 **这两种对象访问方式各有优势。使用句柄来访问的最大好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。使用直接指针访问方式最大的好处就是速度快，它节省了一次指针定位的时间开销。**
 
-
-
-
 ## 四  重点补充内容
 
 ### String 类和常量池
 
-**1 String 对象的两种创建方式：**
+#### 1 String 对象的两种创建方式
 
 ```java
-     String str1 = "abcd";
-     String str2 = new String("abcd");
-     System.out.println(str1==str2);//false
+String str1 = "abcd";
+String str2 = new String("abcd");
+System.out.println(str1==str2);//false
 ```
 
 这两种不同的创建方法是有差别的，第一种方式是在常量池中拿对象，第二种方式是直接在堆内存空间创建一个新的对象。
 ![](https://user-gold-cdn.xitu.io/2018/8/22/16561e59a59c0873?w=698&h=355&f=png&s=10449)
-记住：只要使用new方法，便需要创建新的对象。
+*记住：只要使用new方法，便需要创建新的对象。*
 
-
-
-**2 String 类型的常量池比较特殊。它的主要使用方法有两种：**
+### 2 String 类型的常量池比较特殊。它的主要使用方法有两种
 
 - 直接使用双引号声明出来的 String 对象会直接存储在常量池中。
 - 如果不是用双引号声明的 String 对象，可以使用 String 提供的 intern 方法。String.intern() 是一个 Native 方法，它的作用是：如果运行时常量池中已经包含一个等于此 String 对象内容的字符串，则返回常量池中该字符串的引用；如果没有，则在常量池中创建与此 String 内容相同的字符串，并返回常量池中创建的字符串的引用。
 
 ```java
-	      String s1 = new String("计算机");
-	      String s2 = s1.intern();
-	      String s3 = "计算机";
-	      System.out.println(s2);//计算机
-	      System.out.println(s1 == s2);//false，因为一个是堆内存中的String对象一个是常量池中的String对象，
-	      System.out.println(s3 == s2);//true，因为两个都是常量池中的String对象
+String s1 = new String("计算机");
+String s2 = s1.intern();
+String s3 = "计算机";
+System.out.println(s2);//计算机
+System.out.println(s1 == s2);//false，因为一个是堆内存中的String对象一个是常量池中的String对象，
+System.out.println(s3 == s2);//true，因为两个都是常量池中的String对象
 ```
-**3 String 字符串拼接**
+
+### 3 String 字符串拼接
+
 ```java
-		  String str1 = "str";
-		  String str2 = "ing";
-		  
-		  String str3 = "str" + "ing";//常量池中的对象
-		  String str4 = str1 + str2; //在堆上创建的新的对象	  
-		  String str5 = "string";//常量池中的对象
-		  System.out.println(str3 == str4);//false
-		  System.out.println(str3 == str5);//true
-		  System.out.println(str4 == str5);//false
+String str1 = "str";
+String str2 = "ing";
+
+String str3 = "str" + "ing";//常量池中的对象
+String str4 = str1 + str2; //在堆上创建的新的对象
+String str5 = "string";//常量池中的对象
+System.out.println(str3 == str4);//false
+System.out.println(str3 == str5);//true
+System.out.println(str4 == str5);//false
 ```
+
 ![](https://user-gold-cdn.xitu.io/2018/8/22/16561e59a4d13f92?w=593&h=603&f=png&s=22265)
 
 尽量避免多个字符串拼接，因为这样会重新创建对象。如果需要改变字符串的话，可以使用 StringBuilder 或者 StringBuffer。
@@ -236,15 +224,15 @@ JDK1.4中新加入的 **NIO(New Input/Output) 类**，引入了一种基于**通
 **验证：**
 
 ```java
-		String s1 = new String("abc");// 堆内存的地址值
-		String s2 = "abc";
-		System.out.println(s1 == s2);// 输出false,因为一个是堆内存，一个是常量池的内存，故两者是不同的。
-		System.out.println(s1.equals(s2));// 输出true
+String s1 = new String("abc");// 堆内存的地址值
+String s2 = "abc";
+System.out.println(s1 == s2);// 输出false,因为一个是堆内存，一个是常量池的内存，故两者是不同的。
+System.out.println(s1.equals(s2));// 输出true
 ```
 
 **结果：**
 
-```
+```bash
 false
 true
 ```
@@ -259,15 +247,15 @@ true
 - **两种浮点数类型的包装类 Float,Double 并没有实现常量池技术。**
 
 ```java
-		Integer i1 = 33;
-		Integer i2 = 33;
-		System.out.println(i1 == i2);// 输出true
-		Integer i11 = 333;
-		Integer i22 = 333;
-		System.out.println(i11 == i22);// 输出false
-		Double i3 = 1.2;
-		Double i4 = 1.2;
-		System.out.println(i3 == i4);// 输出false
+Integer i1 = 33;
+Integer i2 = 33;
+System.out.println(i1 == i2);// 输出true
+Integer i11 = 333;
+Integer i22 = 333;
+System.out.println(i11 == i22);// 输出false
+Double i3 = 1.2;
+Double i4 = 1.2;
+System.out.println(i3 == i4);// 输出false
 ```
 
 **Integer 缓存源代码：** 
@@ -276,44 +264,46 @@ true
 /**
 *此方法将始终缓存-128到127（包括端点）范围内的值，并可以缓存此范围之外的其他值。
 */
-    public static Integer valueOf(int i) {
-        if (i >= IntegerCache.low && i <= IntegerCache.high)
-            return IntegerCache.cache[i + (-IntegerCache.low)];
-        return new Integer(i);
-    }
+public static Integer valueOf(int i) {
+    if (i >= IntegerCache.low && i <= IntegerCache.high)
+        return IntegerCache.cache[i + (-IntegerCache.low)];
+    return new Integer(i);
+}
 
 ```
 
 **应用场景：**
+
 1. Integer i1=40；Java 在编译的时候会直接将代码封装成Integer i1=Integer.valueOf(40);，从而使用常量池中的对象。
-2.  Integer i1 = new Integer(40);这种情况下会创建新的对象。
+2. Integer i1 = new Integer(40);这种情况下会创建新的对象。
 
 ```java
-  Integer i1 = 40;
-  Integer i2 = new Integer(40);
-  System.out.println(i1==i2);//输出false
+Integer i1 = 40;
+Integer i2 = new Integer(40);
+System.out.println(i1==i2);//输出false
 ```
+
 **Integer比较更丰富的一个例子:**
 
 ```java
-  Integer i1 = 40;
-  Integer i2 = 40;
-  Integer i3 = 0;
-  Integer i4 = new Integer(40);
-  Integer i5 = new Integer(40);
-  Integer i6 = new Integer(0);
-  
-  System.out.println("i1=i2   " + (i1 == i2));
-  System.out.println("i1=i2+i3   " + (i1 == i2 + i3));
-  System.out.println("i1=i4   " + (i1 == i4));
-  System.out.println("i4=i5   " + (i4 == i5));
-  System.out.println("i4=i5+i6   " + (i4 == i5 + i6));   
-  System.out.println("40=i5+i6   " + (40 == i5 + i6));     
+Integer i1 = 40;
+Integer i2 = 40;
+Integer i3 = 0;
+Integer i4 = new Integer(40);
+Integer i5 = new Integer(40);
+Integer i6 = new Integer(0);
+
+System.out.println("i1=i2   " + (i1 == i2));
+System.out.println("i1=i2+i3   " + (i1 == i2 + i3));
+System.out.println("i1=i4   " + (i1 == i4));
+System.out.println("i4=i5   " + (i4 == i5));
+System.out.println("i4=i5+i6   " + (i4 == i5 + i6));
+System.out.println("40=i5+i6   " + (40 == i5 + i6));
 ```
 
 结果：
 
-```
+```bash
 i1=i2   true
 i1=i2+i3   true
 i1=i4   false
@@ -326,7 +316,6 @@ i4=i5+i6   true
 
 语句i4 == i5 + i6，因为+这个操作符不适用于Integer对象，首先i5和i6进行自动拆箱操作，进行数值相加，即i4 == 40。然后Integer对象无法与数值进行直接比较，所以i4自动拆箱转为int值40，最终这条语句转为40 == 40进行数值比较。
 
-
 **参考：**
 
 - 《深入理解Java虚拟机：JVM高级特性与最佳实践（第二版》
@@ -335,8 +324,3 @@ i4=i5+i6   true
 - https://www.cnblogs.com/java-zhao/p/5180492.html
 - https://blog.csdn.net/qq_26222859/article/details/73135660
 - https://blog.csdn.net/cugwuhan2014/article/details/78038254
-
-
-
-
-

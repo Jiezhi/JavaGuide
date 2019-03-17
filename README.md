@@ -22,7 +22,7 @@
   * [Java 集合框架](#java-集合框架)
   * [Java 多线程](#java-多线程)
   * [Java BIO,NIO,AIO](#java-bionioaio)
-  * [Java 虚拟机 jvm](#java-虚拟机-jvm)
+  * [Java 虚拟机 JVM](#java-虚拟机-jvm)
   * [设计模式](#设计模式)
 * [数据结构与算法](#数据结构与算法)
   * [数据结构](#数据结构)
@@ -80,7 +80,7 @@
 * [BATJ都爱问的多线程面试题](Java相关/Multithread/BATJ都爱问的多线程面试题.md)
 * [并发容器总结](Java相关/Multithread/并发容器总结.md)
 
-### Java 虚拟机 jvm
+### Java 虚拟机 JVM
 
 * [可能是把Java内存区域讲的最清楚的一篇文章](Java相关/可能是把Java内存区域讲的最清楚的一篇文章.md)
 * [搞定JVM垃圾回收就是这么简单](Java相关/搞定JVM垃圾回收就是这么简单.md)
